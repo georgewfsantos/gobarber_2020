@@ -3,6 +3,8 @@ import { verify } from 'jsonwebtoken';
 
 import authConfig from '../config/auth';
 
+import AppError from '../errors/AppError';
+
 interface TokenPayload {
   iad: number;
   exp: number;
@@ -17,7 +19,7 @@ export default function checkAuthentication(
   const authHeader = request.headers.authorization;
 
   if (!authHeader) {
-    throw new Error('Token was not provided');
+    throw new AppError('Token was not provided', 401);
   }
 
   const [, token] = authHeader.split(' ');
@@ -33,6 +35,6 @@ export default function checkAuthentication(
 
     return next();
   } catch {
-    throw new Error('Invalid token');
+    throw new AppError('Invalid token', 401);
   }
 }
