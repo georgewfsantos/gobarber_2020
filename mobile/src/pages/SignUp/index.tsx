@@ -6,6 +6,7 @@ import {Form} from '@unform/mobile';
 import {FormHandles} from '@unform/core';
 import * as Yup from 'yup';
 
+
 import api from '../../services/api';
 
 import getValidationErrors from '../../utils/getValidationErrors';
@@ -62,12 +63,12 @@ const SignUp: React.FC = () => {
           // return
         }
 
-        Alert.alert('Erro ao realizar o cadastro', 'Ocorreu um erro e não foi possível realizar o cadastro. Tente novamente', )
+        Alert.alert('Erro ao realizar cadastro', 'Verifique os dados e tente novamente', )
 
 
       }
     },
-    [],
+    [navigation],
   );
 
   return (
