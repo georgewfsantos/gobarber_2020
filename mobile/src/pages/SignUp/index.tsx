@@ -1,5 +1,5 @@
 import React, {useCallback, useRef} from 'react';
-import { Image, ScrollView, View, KeyboardAvoidingView, Platform } from 'react-native';
+import { Image, ScrollView, View, KeyboardAvoidingView,TextInput, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 import {Form} from '@unform/mobile';
@@ -16,6 +16,8 @@ import { Container, Title, BackToSigIn, BackToSigInText } from './styles';
 const SignUp: React.FC = () => {
   const navigation = useNavigation();
   const formRef = useRef<FormHandles>(null);
+  const emailInputRef= useRef<TextInput>(null);
+  const passwordInputRef= useRef<TextInput>(null);
 
   const handleSignIn = useCallback((data: object)=>{
     console.log(data);
@@ -33,9 +35,41 @@ const SignUp: React.FC = () => {
       </View>
 
       <Form ref={formRef} onSubmit={handleSignIn} >
-      <Input name="name" icon="user" placeholder="Nome"/>
-      <Input name="email" icon="mail" placeholder="E-mail"/>
-      <Input name="password" icon="lock" placeholder="Senha"/>
+      <Input
+      name="name"
+      icon="user"
+      placeholder="Nome"
+      autoCapitalize="words"
+      returnKeyType="next"
+      onSubmitEditing={()=> {
+        emailInputRef.current?.focus()
+      }}
+      />
+
+      <Input
+      name="email"
+      icon="mail"
+      placeholder="E-mail"
+      keyboardType="email-address"
+      autoCorrect={false}
+      autoCapitalize="none"
+      returnKeyType="next"
+      ref={emailInputRef}
+      onSubmitEditing={()=> {
+        passwordInputRef.current?.focus()
+      }}
+      />
+
+      <Input
+      name="password"
+      icon="lock"
+      placeholder="Senha"
+      secureTextEntry
+      textContentType="newPassword"
+      returnKeyType="send"
+      ref={passwordInputRef}
+      onSubmitEditing={() =>{formRef.current?.submitForm()}}
+      />
 
       <Button onPress={() =>{formRef.current?.submitForm()}}>Entrar</Button>
       </Form>
