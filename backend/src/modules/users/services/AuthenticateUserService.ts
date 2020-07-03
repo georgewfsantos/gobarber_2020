@@ -1,9 +1,9 @@
-import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { injectable, inject } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
 import IUsersRepository from '../repositories/IUsersRepository';
+import IHashProvider from '../providers/HashProvider/models/IHashProvider';
 
 import authConfig from '@config/auth';
 
@@ -24,6 +24,9 @@ class AuthenticateUserService {
   constructor(
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
+
+    @inject('HashProvider')
+    private hashProvider: IHashProvider,
   ) {}
 
   public async execute({ email, password }: IRequest): Promise<IResponse> {
@@ -36,7 +39,10 @@ class AuthenticateUserService {
     // user.password - password from the database
     // password - parameter from the execute method in this class ( password typed by user when trying to authenticate)
 
-    const passwordsMatch = await compare(password, user.password);
+    const passwordsMatch = await this.hashProvider.compareHash(
+      password,
+      user.password,
+    );
 
     if (!passwordsMatch) {
       throw new AppError('Incorrect email and/or password', 401);
