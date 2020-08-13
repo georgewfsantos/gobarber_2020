@@ -46,7 +46,7 @@ class CreateAppointmentService {
     );
 
     if (appointmentIsTaken) {
-      throw new AppError('Date and time not available ');
+      throw new AppError('Time not available. Please, choose another time ');
     }
 
     const appointment = await this.appointmentsRepository.create({
