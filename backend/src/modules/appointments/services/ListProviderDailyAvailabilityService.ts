@@ -1,8 +1,7 @@
 import { injectable, inject } from 'tsyringe';
-import { getHours } from 'date-fns';
+import { getHours, isAfter } from 'date-fns';
 // import User from '@modules/users/infra/typeorm/entities/User';
 import IAppointmentsRepository from '../repositories/IAppointmentsRepository';
-import AppointmentsRepository from '../infra/typeorm/repositories/AppointmentsRepository';
 
 interface IRequest {
   provider_id: string;
@@ -45,12 +44,21 @@ class ListProviderDailyAvailabilityService {
       (_, index) => index + firstAvailableHour,
     );
 
+    const currentDate = new Date(Date.now());
+
     const availability = eachHourArray.map(hour => {
       const thereIsAppointmentAtHour = appointments.find(
         appointment => getHours(appointment.date) === hour,
       );
 
-      return { hour, available: !thereIsAppointmentAtHour };
+      const appointmentDateAndTime = new Date(year, month - 1, day, hour);
+
+      return {
+        hour,
+        available:
+          !thereIsAppointmentAtHour &&
+          isAfter(appointmentDateAndTime, currentDate),
+      };
     });
 
     return availability;
