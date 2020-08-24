@@ -42,7 +42,7 @@ export default {
   config: {
     disk: {},
     aws: {
-      bucket: 'app-gobarber-g-2020',
+      bucket: 'app-new-gobarber-2020',
     },
   },
 } as IUploadConfig;
