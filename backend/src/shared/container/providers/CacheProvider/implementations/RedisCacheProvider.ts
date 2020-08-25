@@ -1,7 +1,6 @@
 import Redis, { Redis as RedisClient } from 'ioredis';
 import cacheConfig from '@config/cache';
 import ICacheProvider from '../models/ICacheProvider';
-import JSONTransport from 'nodemailer/lib/json-transport';
 
 export default class RedisCacheProvider implements ICacheProvider {
   private client: RedisClient;
