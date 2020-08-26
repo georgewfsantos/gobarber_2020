@@ -51,6 +51,7 @@ class CreateAppointmentService {
 
     const appointmentIsTaken = await this.appointmentsRepository.findByDate(
       appointmentDate,
+      provider_id,
     );
 
     if (appointmentIsTaken) {
