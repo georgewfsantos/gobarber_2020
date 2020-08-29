@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { isToday, format, parseISO } from 'date-fns';
+import { isToday, format, parseISO, isAfter } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import DayPicker, { DayModifiers } from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
@@ -49,7 +49,7 @@ const Dashboard: React.FC = () => {
   >([]);
 
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
-    if (modifiers.available) {
+    if (modifiers.available && !modifiers.disabled) {
       setSelectedDate(day);
     }
   }, []);
@@ -70,6 +70,26 @@ const Dashboard: React.FC = () => {
         setMonthAvailability(response.data);
       });
   }, [currentMonth, user.id]);
+
+  useEffect(() => {
+    api
+      .get<Appointment[]>('/appointments/my_appointments', {
+        params: {
+          year: selectedDate.getFullYear(),
+          month: selectedDate.getMonth() + 1,
+          day: selectedDate.getDate(),
+        },
+      })
+      .then((response) => {
+        const apppointmentswithHour = response.data.map((appointment) => {
+          return {
+            ...appointment,
+            formattedHour: format(parseISO(appointment.date), 'HH:mm'),
+          };
+        });
+        setAppointments(apppointmentswithHour);
+      });
+  }, [selectedDate]);
 
   const disabledDays = useMemo(() => {
     const dates = monthAvailability
@@ -106,25 +126,11 @@ const Dashboard: React.FC = () => {
     });
   }, [appointments]);
 
-  useEffect(() => {
-    api
-      .get<Appointment[]>('/appointments/my_appointments', {
-        params: {
-          year: selectedDate.getFullYear(),
-          month: selectedDate.getMonth() + 1,
-          day: selectedDate.getDate(),
-        },
-      })
-      .then((response) => {
-        const apppointmentswithHour = response.data.map((appointment) => {
-          return {
-            ...appointment,
-            formattedHour: format(parseISO(appointment.date), 'HH:mm'),
-          };
-        });
-        setAppointments(apppointmentswithHour);
-      });
-  }, [selectedDate]);
+  const nextAppointment = useMemo(() => {
+    return appointments.find((appointment) =>
+      isAfter(parseISO(appointment.date), new Date()),
+    );
+  }, [appointments]);
 
   return (
     <Container>
@@ -154,23 +160,29 @@ const Dashboard: React.FC = () => {
             <span>{selectedDateAsWeekDay}</span>
           </p>
 
-          <NextAppointment>
-            <strong>Atendimento a seguir:</strong>
-            <div>
-              <img
-                src="https://avatars0.githubusercontent.com/u/33661312?s=120&v=4"
-                alt="Me"
-              />
-              <strong>Fulano Fernandes</strong>
-              <span>
-                <FiClock />
-                08:00
-              </span>
-            </div>
-          </NextAppointment>
+          {isToday(selectedDate) && nextAppointment && (
+            <NextAppointment>
+              <strong>Próximo atendimento:</strong>
+              <div>
+                <img
+                  src={nextAppointment.user.avatar_url}
+                  alt={nextAppointment.user.avatar_url}
+                />
+                <strong>{nextAppointment.user.name}</strong>
+                <span>
+                  <FiClock />
+                  {nextAppointment?.formattedHour}
+                </span>
+              </div>
+            </NextAppointment>
+          )}
 
           <Section>
             <strong>Manhã</strong>
+            {morningAppointments.length === 0 && (
+              <p>Nenhum agendamento neste período</p>
+            )}
+
             {morningAppointments.map((appointment) => (
               <Appointment key={appointment.id}>
                 <span>
@@ -191,6 +203,10 @@ const Dashboard: React.FC = () => {
 
           <Section>
             <strong>Tarde</strong>
+
+            {afternoonAppointments.length === 0 && (
+              <p>Nenhum agendamento neste período</p>
+            )}
 
             {afternoonAppointments.map((appointment) => (
               <Appointment key={appointment.id}>
