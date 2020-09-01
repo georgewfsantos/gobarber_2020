@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../hooks/auth';
@@ -36,7 +35,6 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     api.get('/providers').then((response) => {
-      console.log(response.data);
       setProviders(response.data);
     });
   }, []);
