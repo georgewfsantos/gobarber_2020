@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { format } from 'date-fns';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -31,6 +31,8 @@ import {
   SectionContent,
   AvailableTime,
   AvailableTimeText,
+  CreateAppointmentButton,
+  CreateAppointmentButtonText,
 } from './styles';
 
 export interface Provider {
@@ -51,7 +53,7 @@ interface DailyAvailabilityItem {
 const CreateAppointment: React.FC = () => {
   const { user } = useAuth();
   const route = useRoute();
-  const { goBack } = useNavigation();
+  const { goBack, navigate } = useNavigation();
   const routeParams = route.params as RouteParams;
 
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -111,6 +113,27 @@ const CreateAppointment: React.FC = () => {
   const handleSelectTime = useCallback((hour: number) => {
     setSelectedTime(hour);
   }, []);
+
+  const handleAppointmentCreation = useCallback(async () => {
+    try {
+      const date = new Date(selectedDate);
+
+      date.setHours(selectedTime);
+      date.setMinutes(0);
+
+      await api.post('/appointments', {
+        provider_id: selectedProvider,
+        date,
+      });
+
+      navigate('SuccessScreen', { date: date.getTime() });
+    } catch (err) {
+      Alert.alert(
+        'Erro ao criar agendamento.',
+        'Verifique os dados informados e tente novamente.',
+      );
+    }
+  }, [navigate, selectedDate, selectedTime, selectedProvider]);
 
   const morningAvailability = useMemo(() => {
     return dailyAvailability
@@ -234,6 +257,10 @@ const CreateAppointment: React.FC = () => {
           </Section>
         </Schedule>
       </Content>
+
+      <CreateAppointmentButton onPress={handleAppointmentCreation}>
+        <CreateAppointmentButtonText>Agendar</CreateAppointmentButtonText>
+      </CreateAppointmentButton>
     </Container>
   );
 };
