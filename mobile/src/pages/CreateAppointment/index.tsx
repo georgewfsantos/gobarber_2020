@@ -4,10 +4,6 @@ import { Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-interface DateTimePickerProps {
-  textColor?: string;
-}
-
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
 
@@ -38,6 +34,11 @@ interface RouteParams {
   providerId: string;
 }
 
+interface DailyAvailabilityItem {
+  hour: number;
+  available: true;
+}
+
 const CreateAppointment: React.FC = () => {
   const { user } = useAuth();
   const route = useRoute();
@@ -50,6 +51,9 @@ const CreateAppointment: React.FC = () => {
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [dailyVailability, setDailyAvailability] = useState<
+    DailyAvailabilityItem[]
+  >([]);
 
   useEffect(() => {
     api.get('/providers').then((response) => {
@@ -57,6 +61,20 @@ const CreateAppointment: React.FC = () => {
       setProviders(response.data);
     });
   }, []);
+
+  useEffect(() => {
+    api
+      .get(`/providers/${selectedProvider}/daily-availability`, {
+        params: {
+          year: selectedDate.getFullYear(),
+          month: selectedDate.getMonth() + 1,
+          day: selectedDate.getDate(),
+        },
+      })
+      .then((response) => {
+        setDailyAvailability(response.data);
+      });
+  }, [selectedDate, selectedProvider]);
 
   const navigateBack = useCallback(() => {
     goBack();
