@@ -1,16 +1,23 @@
-import React, {useCallback, useRef} from 'react';
-import { Image, ScrollView, View, KeyboardAvoidingView,TextInput, Platform, Alert } from 'react-native';
+import React, { useCallback, useRef } from 'react';
+import {
+  Image,
+  ScrollView,
+  View,
+  KeyboardAvoidingView,
+  TextInput,
+  Platform,
+  Alert,
+  StatusBar,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import {useNavigation} from '@react-navigation/native';
-import {Form} from '@unform/mobile';
-import {FormHandles} from '@unform/core';
+import { useNavigation } from '@react-navigation/native';
+import { Form } from '@unform/mobile';
+import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
-
 
 import api from '../../services/api';
 
 import getValidationErrors from '../../utils/getValidationErrors';
-
 
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -25,12 +32,11 @@ interface SignUpFormData {
   password: string;
 }
 
-
 const SignUp: React.FC = () => {
   const navigation = useNavigation();
   const formRef = useRef<FormHandles>(null);
-  const emailInputRef= useRef<TextInput>(null);
-  const passwordInputRef= useRef<TextInput>(null);
+  const emailInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
 
   const handleSignUp = useCallback(
     async (data: SignUpFormData) => {
@@ -48,13 +54,17 @@ const SignUp: React.FC = () => {
           abortEarly: false,
         });
 
-         await api.post('/users', data);
-         Alert.alert('Cadastro realizado com sucesso!', 'Você já pode fazer seu login');
+        await api.post('/users', data);
+        Alert.alert(
+          'Cadastro realizado com sucesso!',
+          'Você já pode fazer seu login',
+        );
         navigation.goBack();
 
-        Alert.alert('Cadastro realizado com sucesso!', 'Você já pode fazer seu login', )
-
-
+        Alert.alert(
+          'Cadastro realizado com sucesso!',
+          'Você já pode fazer seu login',
+        );
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err);
@@ -63,9 +73,10 @@ const SignUp: React.FC = () => {
           // return
         }
 
-        Alert.alert('Erro ao realizar cadastro', 'Verifique os dados e tente novamente', )
-
-
+        Alert.alert(
+          'Erro ao realizar cadastro',
+          'Verifique os dados e tente novamente',
+        );
       }
     },
     [navigation],
@@ -73,70 +84,79 @@ const SignUp: React.FC = () => {
 
   return (
     <>
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1}} enabled>
+      <StatusBar barStyle="light-content" backgroundColor="#312e38" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
+        enabled
+      >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flex: 1 }}
+        >
+          <Container>
+            <Image source={logo} />
+            <View>
+              <Title>Crie sua conta</Title>
+            </View>
 
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flex: 1}}>
-    <Container>
-      <Image source={logo}/>
-      <View>
-      <Title>Crie sua conta</Title>
-      </View>
+            <Form ref={formRef} onSubmit={handleSignUp}>
+              <Input
+                name="name"
+                icon="user"
+                placeholder="Nome"
+                autoCapitalize="words"
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  emailInputRef.current?.focus();
+                }}
+              />
 
-      <Form ref={formRef} onSubmit={handleSignUp} >
-      <Input
-      name="name"
-      icon="user"
-      placeholder="Nome"
-      autoCapitalize="words"
-      returnKeyType="next"
-      onSubmitEditing={()=> {
-        emailInputRef.current?.focus()
-      }}
-      />
+              <Input
+                name="email"
+                icon="mail"
+                placeholder="E-mail"
+                keyboardType="email-address"
+                autoCorrect={false}
+                autoCapitalize="none"
+                returnKeyType="next"
+                ref={emailInputRef}
+                onSubmitEditing={() => {
+                  passwordInputRef.current?.focus();
+                }}
+              />
 
-      <Input
-      name="email"
-      icon="mail"
-      placeholder="E-mail"
-      keyboardType="email-address"
-      autoCorrect={false}
-      autoCapitalize="none"
-      returnKeyType="next"
-      ref={emailInputRef}
-      onSubmitEditing={()=> {
-        passwordInputRef.current?.focus()
-      }}
-      />
+              <Input
+                name="password"
+                icon="lock"
+                placeholder="Senha"
+                secureTextEntry
+                textContentType="newPassword"
+                returnKeyType="send"
+                ref={passwordInputRef}
+                onSubmitEditing={() => {
+                  formRef.current?.submitForm();
+                }}
+              />
 
-      <Input
-      name="password"
-      icon="lock"
-      placeholder="Senha"
-      secureTextEntry
-      textContentType="newPassword"
-      returnKeyType="send"
-      ref={passwordInputRef}
-      onSubmitEditing={() =>{formRef.current?.submitForm()}}
-      />
+              <Button
+                onPress={() => {
+                  formRef.current?.submitForm();
+                }}
+              >
+                Entrar
+              </Button>
+            </Form>
+          </Container>
+        </ScrollView>
+      </KeyboardAvoidingView>
+      <BackToSigIn onPress={() => navigation.goBack()}>
+        <Icon name="arrow-left" size={20} color="#fff" />
 
-      <Button onPress={() =>{formRef.current?.submitForm()}}>Entrar</Button>
-      </Form>
-
-
-
-    </Container>
-    </ScrollView>
-
-    </KeyboardAvoidingView>
-    <BackToSigIn onPress={()=> navigation.goBack()}>
-    <Icon name="arrow-left" size={20} color="#fff"/>
-
-      <BackToSigInText>
-        Voltar para login
-      </BackToSigInText>
-    </BackToSigIn>
+        <BackToSigInText>Voltar para login</BackToSigInText>
+      </BackToSigIn>
     </>
   );
-}
+};
 
 export default SignUp;
