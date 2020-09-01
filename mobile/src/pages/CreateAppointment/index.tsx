@@ -1,7 +1,8 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import { format } from 'date-fns';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { useAuth } from '../../hooks/auth';
@@ -51,7 +52,7 @@ const CreateAppointment: React.FC = () => {
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [dailyVailability, setDailyAvailability] = useState<
+  const [dailyAvailability, setDailyAvailability] = useState<
     DailyAvailabilityItem[]
   >([]);
 
@@ -97,6 +98,30 @@ const CreateAppointment: React.FC = () => {
       setSelectedDate(date);
     }
   }, []);
+
+  const morningAvailability = useMemo(() => {
+    return dailyAvailability
+      .filter(({ hour }) => hour < 12)
+      .map(({ hour, available }) => {
+        return {
+          hour,
+          formattedHour: format(new Date().setHours(hour), 'HH:00'),
+          available,
+        };
+      });
+  }, [dailyAvailability]);
+
+  const afternoonAvailability = useMemo(() => {
+    return dailyAvailability
+      .filter(({ hour }) => hour >= 12)
+      .map(({ hour, available }) => {
+        return {
+          hour,
+          formattedHour: format(new Date().setHours(hour), 'HH:00'),
+          available,
+        };
+      });
+  }, [dailyAvailability]);
 
   return (
     <Container>
@@ -145,6 +170,13 @@ const CreateAppointment: React.FC = () => {
           />
         )}
       </Calendar>
+      {morningAvailability.map(({ formattedHour, available }) => (
+        <CalendarTitle key={formattedHour}>{formattedHour}</CalendarTitle>
+      ))}
+
+      {afternoonAvailability.map(({ formattedHour, available }) => (
+        <CalendarTitle key={formattedHour}>{formattedHour}</CalendarTitle>
+      ))}
     </Container>
   );
 };
