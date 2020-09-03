@@ -3,7 +3,6 @@ import Icon from 'react-native-vector-icons/Feather';
 import ImagePicker from 'react-native-image-picker';
 import {
   ScrollView,
-  View,
   KeyboardAvoidingView,
   TextInput,
   Platform,
@@ -26,7 +25,9 @@ import Button from '../../components/Button';
 import {
   Container,
   BackButton,
+  TitleView,
   Title,
+  SignOutButton,
   UserAvatarButton,
   UserAvatar,
 } from './styles';
@@ -40,7 +41,7 @@ interface ProfileFormData {
 }
 
 const Profile: React.FC = () => {
-  const {user, updateUser} = useAuth();
+  const {user, signOut, updateUser} = useAuth();
   const navigation = useNavigation();
   const formRef = useRef<FormHandles>(null);
   const emailInputRef = useRef<TextInput>(null);
@@ -174,9 +175,12 @@ const Profile: React.FC = () => {
             <UserAvatarButton onPress={handleAvatarUpdate}>
               <UserAvatar source={{uri: user.avatar_url}} />
             </UserAvatarButton>
-            <View>
+            <TitleView>
               <Title>Meu perfil</Title>
-            </View>
+              <SignOutButton onPress={signOut}>
+                <Icon name="power" size={20} color="#999591" />
+              </SignOutButton>
+            </TitleView>
 
             <Form
               initialData={user}

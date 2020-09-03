@@ -12,6 +12,12 @@ export const BackButton = styled.TouchableOpacity`
   top: 85px;
 `;
 
+export const TitleView = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 export const Title = styled.Text`
   font-size: 24px;
   color: #f4ede8;
@@ -19,6 +25,8 @@ export const Title = styled.Text`
   margin: 64px 0 24px;
   margin: 24px 0;
 `;
+
+export const SignOutButton = styled.TouchableOpacity``;
 
 export const UserAvatarButton = styled.TouchableOpacity``;
 
